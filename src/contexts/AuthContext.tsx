@@ -143,7 +143,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       } else {
         toast({
           title: "Account Created",
-          description: "Please check your email to verify your account",
+          description: "Successfully created your account. Now log in to continue.",
         });
       }
       

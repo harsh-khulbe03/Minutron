@@ -1,17 +1,36 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Clock, Plus, LogOut } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Play, Pause, Clock, Plus, LogOut } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 interface Project {
   id: string;
@@ -37,16 +56,16 @@ const UserDashboard = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<string>('');
-  const [filterProject, setFilterProject] = useState<string>('all');
-  const [filterDate, setFilterDate] = useState<string>('');
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [filterProject, setFilterProject] = useState<string>("all");
+  const [filterDate, setFilterDate] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   const [newEntry, setNewEntry] = useState({
-    project_id: '',
-    description: '',
-    start_time: '',
-    end_time: '',
+    project_id: "",
+    description: "",
+    start_time: "",
+    end_time: "",
   });
 
   useEffect(() => {
@@ -57,10 +76,10 @@ const UserDashboard = () => {
   const fetchProjects = async () => {
     try {
       const { data, error } = await supabase
-        .from('projects')
-        .select('id, name, description')
-        .eq('is_active', true);
-      
+        .from("projects")
+        .select("id, name, description")
+        .eq("is_active", true);
+
       if (error) throw error;
       setProjects(data || []);
     } catch (error: any) {
@@ -75,8 +94,9 @@ const UserDashboard = () => {
   const fetchTimeEntries = async () => {
     try {
       const { data, error } = await supabase
-        .from('time_entries')
-        .select(`
+        .from("time_entries")
+        .select(
+          `
           id,
           description,
           start_time,
@@ -85,9 +105,10 @@ const UserDashboard = () => {
           is_running,
           project_id,
           projects!inner(name)
-        `)
-        .order('start_time', { ascending: false });
-      
+        `
+        )
+        .order("start_time", { ascending: false });
+
       if (error) throw error;
       setTimeEntries(data || []);
     } catch (error: any) {
@@ -100,18 +121,16 @@ const UserDashboard = () => {
     setLoading(false);
   };
 
-  const startTimer = async (projectId: string, description: string = '') => {
+  const startTimer = async (projectId: string, description: string = "") => {
     try {
-      const { error } = await supabase
-        .from('time_entries')
-        .insert({
-          user_id: user?.id,
-          project_id: projectId,
-          description,
-          start_time: new Date().toISOString(),
-          is_running: true,
-        });
-      
+      const { error } = await supabase.from("time_entries").insert({
+        user_id: user?.id,
+        project_id: projectId,
+        description,
+        start_time: new Date().toISOString(),
+        is_running: true,
+      });
+
       if (error) throw error;
       toast({ title: "Timer started" });
       fetchTimeEntries();
@@ -127,13 +146,13 @@ const UserDashboard = () => {
   const stopTimer = async (entryId: string) => {
     try {
       const { error } = await supabase
-        .from('time_entries')
+        .from("time_entries")
         .update({
           end_time: new Date().toISOString(),
           is_running: false,
         })
-        .eq('id', entryId);
-      
+        .eq("id", entryId);
+
       if (error) throw error;
       toast({ title: "Timer stopped" });
       fetchTimeEntries();
@@ -148,21 +167,24 @@ const UserDashboard = () => {
 
   const createManualEntry = async () => {
     try {
-      const { error } = await supabase
-        .from('time_entries')
-        .insert({
-          user_id: user?.id,
-          project_id: newEntry.project_id,
-          description: newEntry.description,
-          start_time: newEntry.start_time,
-          end_time: newEntry.end_time,
-          is_running: false,
-        });
-      
+      const { error } = await supabase.from("time_entries").insert({
+        user_id: user?.id,
+        project_id: newEntry.project_id,
+        description: newEntry.description,
+        start_time: newEntry.start_time,
+        end_time: newEntry.end_time,
+        is_running: false,
+      });
+
       if (error) throw error;
       toast({ title: "Time entry created" });
       setIsCreateDialogOpen(false);
-      setNewEntry({ project_id: '', description: '', start_time: '', end_time: '' });
+      setNewEntry({
+        project_id: "",
+        description: "",
+        start_time: "",
+        end_time: "",
+      });
       fetchTimeEntries();
     } catch (error: any) {
       toast({
@@ -173,23 +195,28 @@ const UserDashboard = () => {
     }
   };
 
-  const runningEntry = timeEntries.find(entry => entry.is_running);
+  const runningEntry = timeEntries.find((entry) => entry.is_running);
 
-  const filteredEntries = timeEntries.filter(entry => {
-    const matchesProject = filterProject === 'all' || entry.project_id === filterProject;
+  const filteredEntries = timeEntries.filter((entry) => {
+    const matchesProject =
+      filterProject === "all" || entry.project_id === filterProject;
     const matchesDate = !filterDate || entry.start_time.startsWith(filterDate);
     return matchesProject && matchesDate;
   });
 
   const formatDuration = (minutes: number | null) => {
-    if (!minutes) return '0h 0m';
+    if (!minutes) return "0h 0m";
     const hours = Math.floor(minutes / 60);
     const mins = Math.round(minutes % 60);
     return `${hours}h ${mins}m`;
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -198,7 +225,7 @@ const UserDashboard = () => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Time Tracker</h1>
+            <h1 className="text-3xl font-bold">Minutron</h1>
             <p className="text-muted-foreground">Track your work hours</p>
           </div>
           <Button variant="outline" onClick={() => signOut()}>
@@ -218,30 +245,41 @@ const UserDashboard = () => {
               <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                 <div>
                   <p className="font-medium">{runningEntry.projects.name}</p>
-                  <p className="text-sm text-muted-foreground">{runningEntry.description}</p>
-                  <p className="text-sm">Started: {format(new Date(runningEntry.start_time), 'HH:mm')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {runningEntry.description}
+                  </p>
+                  <p className="text-sm">
+                    Started:{" "}
+                    {format(new Date(runningEntry.start_time), "HH:mm")}
+                  </p>
                 </div>
-                <Button onClick={() => stopTimer(runningEntry.id)} variant="destructive">
+                <Button
+                  onClick={() => stopTimer(runningEntry.id)}
+                  variant="destructive"
+                >
                   <Pause className="mr-2 h-4 w-4" />
                   Stop Timer
                 </Button>
               </div>
             ) : (
               <div className="flex gap-4">
-                <Select value={selectedProject} onValueChange={setSelectedProject}>
+                <Select
+                  value={selectedProject}
+                  onValueChange={setSelectedProject}
+                >
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder="Select project" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map(project => (
+                    {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Button 
-                  onClick={() => startTimer(selectedProject)} 
+                <Button
+                  onClick={() => startTimer(selectedProject)}
                   disabled={!selectedProject}
                 >
                   <Play className="mr-2 h-4 w-4" />
@@ -261,7 +299,7 @@ const UserDashboard = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Projects</SelectItem>
-                {projects.map(project => (
+                {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
                   </SelectItem>
@@ -275,8 +313,11 @@ const UserDashboard = () => {
               className="w-48"
             />
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -291,14 +332,17 @@ const UserDashboard = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="project">Project</Label>
-                  <Select value={newEntry.project_id} onValueChange={(value) => 
-                    setNewEntry(prev => ({ ...prev, project_id: value }))
-                  }>
+                  <Select
+                    value={newEntry.project_id}
+                    onValueChange={(value) =>
+                      setNewEntry((prev) => ({ ...prev, project_id: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select project" />
                     </SelectTrigger>
                     <SelectContent>
-                      {projects.map(project => (
+                      {projects.map((project) => (
                         <SelectItem key={project.id} value={project.id}>
                           {project.name}
                         </SelectItem>
@@ -311,7 +355,12 @@ const UserDashboard = () => {
                   <Textarea
                     id="description"
                     value={newEntry.description}
-                    onChange={(e) => setNewEntry(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setNewEntry((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="What did you work on?"
                   />
                 </div>
@@ -322,7 +371,12 @@ const UserDashboard = () => {
                       id="start_time"
                       type="datetime-local"
                       value={newEntry.start_time}
-                      onChange={(e) => setNewEntry(prev => ({ ...prev, start_time: e.target.value }))}
+                      onChange={(e) =>
+                        setNewEntry((prev) => ({
+                          ...prev,
+                          start_time: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                   <div>
@@ -331,7 +385,12 @@ const UserDashboard = () => {
                       id="end_time"
                       type="datetime-local"
                       value={newEntry.end_time}
-                      onChange={(e) => setNewEntry(prev => ({ ...prev, end_time: e.target.value }))}
+                      onChange={(e) =>
+                        setNewEntry((prev) => ({
+                          ...prev,
+                          end_time: e.target.value,
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -351,8 +410,11 @@ const UserDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredEntries.map(entry => (
-                <div key={entry.id} className="flex items-center justify-between p-4 border rounded-lg">
+              {filteredEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h4 className="font-medium">{entry.projects.name}</h4>
@@ -363,15 +425,20 @@ const UserDashboard = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{entry.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {entry.description}
+                    </p>
                     <p className="text-sm">
-                      {format(new Date(entry.start_time), 'MMM dd, yyyy HH:mm')}
-                      {entry.end_time && ` - ${format(new Date(entry.end_time), 'HH:mm')}`}
+                      {format(new Date(entry.start_time), "MMM dd, yyyy HH:mm")}
+                      {entry.end_time &&
+                        ` - ${format(new Date(entry.end_time), "HH:mm")}`}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      {entry.is_running ? 'Running...' : formatDuration(entry.duration_minutes)}
+                      {entry.is_running
+                        ? "Running..."
+                        : formatDuration(entry.duration_minutes)}
                     </p>
                   </div>
                 </div>
